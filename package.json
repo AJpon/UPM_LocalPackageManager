@@ -1,0 +1,12 @@
+{
+    "author": "pon",
+    "name": "io.github.ajpon.localpackagemanager",
+    "displayName": "Local package manager",
+    "description": "Local package manager",
+    "version": "0.1.0",
+    "keywords": [
+        "upm",
+        "editor"
+    ],
+    "unity": "2022.3"
+}
