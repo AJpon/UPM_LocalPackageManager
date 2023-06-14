@@ -1,6 +1,7 @@
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using UnityEditor;
 using UnityEngine;
 using PackageInfo = UnityEditor.PackageManager.PackageInfo;
@@ -9,19 +10,21 @@ namespace LocalPackageManager
 {
     internal static class AdditionalPackageInfo
     {
-        [System.Serializable]
-        private class PackageManifest
-        {
-            public Dictionary<string, string> dependencies;
-        }
-
         public static string GetPackageInfoFromManifestJson(PackageInfo packageInfo)
         {
             string rawJson = GetManifestJsonContent();
-            var manifest = JsonUtility.FromJson<PackageManifest>(rawJson);
-            return "";
-            // return manifest.dependencies[packageInfo.name];
-        } 
+            JObject jsonObject = JsonConvert.DeserializeObject<JObject>(rawJson);
+            string dependencyVal = jsonObject["dependencies"][packageInfo.name].ToString();
+            return dependencyVal;
+        }
+
+        internal static void SetPackageInfoToManifestJson(PackageInfo packageInfo, string packageInfoVal){
+            string rawJson = GetManifestJsonContent();
+            JObject jsonObject = JsonConvert.DeserializeObject<JObject>(rawJson);
+            jsonObject["dependencies"][packageInfo.name] = packageInfoVal;
+            string outputJson = JsonConvert.SerializeObject(jsonObject, Formatting.Indented);
+            File.WriteAllText("./Packages/manifest.json", outputJson);
+        }
 
         private static string GetManifestJsonContent()
         {
@@ -37,4 +40,5 @@ namespace LocalPackageManager
             return rawJson;
         }
     }
+
 }

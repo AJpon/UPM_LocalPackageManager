@@ -30,8 +30,6 @@ namespace LocalPackageManager
         [InitializeOnLoadMethod]
         private static void InitializeOnLoadMethod()
         {
-            // Debug.Log("UpmLPM:InitializeOnLoadMethod");
-
             // Register extension.
             var ext = new UpmLocalPackageManageExtention();
             PackageManagerExtensions.RegisterExtension(ext as IPackageManagerExtension);
@@ -51,7 +49,7 @@ namespace LocalPackageManager
             if (packageInfo == null) return;
             if (packageInfo.source == PackageSource.Local)
             {
-                Debug.Log($"[UpmLPM] This package is local package.");
+                // Debug.Log($"[UpmLPM] This package is local package.");
                 LocalPackageManageWindow.OpenModal(packageInfo);
             }
         }
@@ -71,7 +69,7 @@ namespace LocalPackageManager
             // Debug.Log($"[UpmLPM] UPM package info: assetPath=" + packageInfo.assetPath);
             if (packageInfo.source == PackageSource.Local)
             {
-                Debug.Log($"[UpmLPM] {packageInfo.displayName} is local package.");
+                // Debug.Log($"[UpmLPM] {packageInfo.displayName} is local package.");
                 // TODO: ローカルパッケージの場合は、マニフェストを編集できるUI出す
                 _packageInfo = packageInfo; //? 暫定処置
                 // CreateLocalPackageManageButton();
@@ -111,8 +109,6 @@ namespace LocalPackageManager
             {
                 removeButton.parent.Insert(0, openLocalPackageManagerButton);
             }
-
-            // TODO: UIの中身の実装
         }
 
         /// <summary>

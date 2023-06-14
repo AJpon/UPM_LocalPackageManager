@@ -1,3 +1,5 @@
+using System;
+using System.IO;
 using UnityEditor;
 using UnityEngine;
 using PackageInfo = UnityEditor.PackageManager.PackageInfo;
@@ -10,7 +12,9 @@ namespace LocalPackageManager
     /// </summary>
     internal sealed class LocalPackageManageWindow : EditorWindow
     {
-        private Rect _positionRect = new(0, 0, 960, 640);
+        const string URI_PREFIX = "file:";
+        private Rect _positionRect = new(0, 0, 600, 340);
+
         private PackageInfo _packageInfo;
         public PackageInfo PackageInfo
         {
@@ -18,38 +22,75 @@ namespace LocalPackageManager
             private set => _packageInfo = value;
         }
         public string PackageInfoFromManifest { get; private set; }
+        public string PackageResolvedPath { get; private set; }
 
-
-        // TODO: ウィンドウの中身作る
         private void OnGUI()
         {
-            titleContent = new GUIContent("Local Package Manager");
+            EditorApplication.projectChanged += () => UpdatePackageInfoFromManifest();
+            minSize = new(440, 260);
+            bool isAbsolutePath = PackageInfo.resolvedPath == PackageInfoFromManifest.Replace("file:", "").Replace("/", "\\");
 
-            GUILayout.Label("Local Package Manager");
-            GUILayout.Box("", GUILayout.ExpandWidth(true), GUILayout.Height(1));
+            titleContent = new GUIContent("Local Package Manager");
+            GUIStyle style = new GUIStyle(EditorStyles.label);
+            style.richText = true;
+
+            // GUILayout.Label("<size=12><b>Local Package Manager</b></size>", style);
+            // GUILayout.Box("", GUILayout.ExpandWidth(true), GUILayout.Height(1));
 
             // 各種パッケージ情報を
-            GUILayout.Label(PackageInfo.displayName);
+            GUILayout.Label("<size=16><b>" + PackageInfo.displayName + "</b></size>", style);
             GUILayout.Label(PackageInfo.name);
             GUILayout.Label(PackageInfo.version);
+            GUILayout.Box("", GUILayout.ExpandWidth(true), GUILayout.Height(1));
+            GUILayout.Label("Installed From", EditorStyles.boldLabel);
             GUILayout.Label(PackageInfo.resolvedPath);
-            GUILayout.Label(PackageInfo.packageId);
+            // GUILayout.Label(PackageInfo.packageId);
+
+            // manifest.json の状態を表示するエリアを作成
+            GUILayout.Space(12);
             GUILayout.Box("", GUILayout.ExpandWidth(true), GUILayout.Height(1));
-            GUILayout.Label(PackageInfoFromManifest);
+            var pathType = isAbsolutePath ? "絶対パス" : "相対パス";
+            GUILayout.Label("<size=14>Manifest.json には<color=yellow>" + (pathType) + "</color>で記録されています。</size>", style);
+            GUILayout.Label("<size=14><b>・ " + PackageInfoFromManifest + "</b></size>", style);
 
-            // Manifest.json の状態を表示するエリアを作成
-            GUILayout.Box("", GUILayout.ExpandWidth(true), GUILayout.Height(1));
+            GUILayout.FlexibleSpace();
 
-            var pathType = (PackageInfo.resolvedPath == PackageInfoFromManifest) ? "絶対パス" : "相対パス";
-            GUILayout.Label("Manifest.json には" + (pathType) + "で記録されています。");
-
-
-            // DropDown
-            if (GUILayout.Button("Show As Dropdown"))
+            // ボタンを作成
+            if (GUILayout.Button("絶対パスに変更"))
             {
-                var window = CreateInstance<LocalPackageManageWindow>();
-                var windowSize = new Vector2(960, 640);
-                window.ShowAsDropDown(new Rect(GUIUtility.GUIToScreenPoint(_positionRect.center), Vector2.zero), windowSize);
+                var abusolutePath = PackageInfo.resolvedPath;
+                abusolutePath = URI_PREFIX + abusolutePath.Replace("\\", "/");
+                AdditionalPackageInfo.SetPackageInfoToManifestJson(PackageInfo, abusolutePath);
+                // ウィンドウを更新
+                UpdatePackageInfoFromManifest();
+            }
+            if (GUILayout.Button("相対パスに変更"))
+            {
+                var abusolutePath = PackageInfo.resolvedPath;
+                var pwd = Path.GetFullPath("./Packages/"); //? ここ "Packages" フォルダ起点であってる？
+                Uri sourceDir = new Uri(pwd);
+                Uri targetDir = new Uri(abusolutePath);
+                Uri relativeUri = sourceDir.MakeRelativeUri(targetDir);
+                if (targetDir.ToString().Replace("file:///", "") == relativeUri.ToString())
+                {
+                    Debug.LogError("[UpmLPM] 相対パスを取得できませんでした。");
+                    bool close = EditorUtility.DisplayDialog("Error", "相対パスを取得できませんでした。", "マネージャーを閉じる", "マネージャーに戻る");
+                    if (close) Close();
+                }
+                else
+                {
+                    var relativePath =  relativeUri.ToString();
+                    // PackageInfo の情報を更新
+                    // PackageInfo.resolvedPath = Path.GetFullPath("./Packages/"+relativePath);
+                    relativePath = URI_PREFIX + relativePath;
+                    AdditionalPackageInfo.SetPackageInfoToManifestJson(PackageInfo, relativePath);
+                }
+                // ウィンドウを更新
+                UpdatePackageInfoFromManifest();
+            }
+            if (GUILayout.Button("Open manifest.json"))
+            {
+                Unity.CodeEditor.CodeEditor.CurrentEditor.OpenProject(Path.GetFullPath("./Packages/manifest.json"));
             }
             if (GUILayout.Button("Close"))
             {
@@ -62,13 +103,23 @@ namespace LocalPackageManager
         }
 
         /// <summary>
+        /// <see cref="PackageInfoFromManifest"/> を更新する。
+        /// </summary>
+        private void UpdatePackageInfoFromManifest(PackageInfo packageInfo = null)
+        {
+            if (packageInfo != null) PackageInfo = packageInfo;
+            PackageInfoFromManifest = AdditionalPackageInfo.GetPackageInfoFromManifestJson(PackageInfo);
+            // PackageResolvedPath = Path.GetFullPath("./Packages/"+relativePath);
+        }
+
+        /// <summary>
         /// Open the window.
         /// </summary>
         public static void Open(PackageInfo packageInfo)
         {
             var window = CreateInstance<LocalPackageManageWindow>();
             window.PackageInfo = packageInfo;
-            window.PackageInfoFromManifest = AdditionalPackageInfo.GetPackageInfoFromManifestJson(packageInfo);
+            window.UpdatePackageInfoFromManifest(packageInfo);
             window.Show();
         }
 
@@ -79,7 +130,7 @@ namespace LocalPackageManager
         {
             var window = CreateInstance<LocalPackageManageWindow>();
             window.PackageInfo = packageInfo;
-            window.PackageInfoFromManifest = AdditionalPackageInfo.GetPackageInfoFromManifestJson(packageInfo);
+            window.UpdatePackageInfoFromManifest(packageInfo);
             window.ShowModal();
         }
     }

@@ -8,5 +8,8 @@
         "upm",
         "editor"
     ],
-    "unity": "2022.3"
+    "unity": "2022.3",
+    "dependencies": {
+        "com.unity.nuget.newtonsoft-json": "1.0.0"
+    }
 }
