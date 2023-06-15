@@ -45,12 +45,10 @@ namespace LocalPackageManager
         }
         void IPackageManagerExtension.OnPackageAddedOrUpdated(PackageInfo packageInfo)
         {
-            // Debug.Log("[UpmLPM] OnPackageAddedOrUpdated");
             if (packageInfo == null) return;
             if (packageInfo.source == PackageSource.Local)
             {
-                // Debug.Log($"[UpmLPM] This package is local package.");
-                LocalPackageManageWindow.OpenModal(packageInfo);
+                LocalPackageManageWindow.Open(packageInfo);
             }
         }
 
@@ -74,6 +72,7 @@ namespace LocalPackageManager
                 _packageInfo = packageInfo; //? 暫定処置
                 // CreateLocalPackageManageButton();
             } else {
+                _packageInfo = null;
                 // RemoveLocalPackageManageButton();
             }
             Initialize();
@@ -103,10 +102,14 @@ namespace LocalPackageManager
 
             // Add open local package manager button.
             // TODO: UI作成(超ざっくりでいいのでとりあえず動くようにする)
+            Debug.Log($"[UpmLPM] _packageInfo.source: {_packageInfo.source}");
             Button openLocalPackageManagerButton = new(() => { LocalPackageManageWindow.Open(_packageInfo); });
             openLocalPackageManagerButton.text = "Edit"; //* 仮ラベル
+            openLocalPackageManagerButton.name = "PackageOpenLocalPackageManagerButton";
+            // openLocalPackageManagerButton.SetEnabled(_packageInfo.source == PackageSource.Local);
             if (FindElement(root, x => x.name == "PackageRemoveCustomButton") is Button removeButton)
             {
+                Debug.Log($"[UpmLPM] removeButton.parent.name: {removeButton.parent.name}");
                 removeButton.parent.Insert(0, openLocalPackageManagerButton);
             }
         }
@@ -114,7 +117,7 @@ namespace LocalPackageManager
         /// <summary>
         /// 作成したUIを削除する
         /// </summary>
-        private void RemoveLocalPackageManageButton()
+        /* private void RemoveLocalPackageManageButton()
         {
             // Find root element.
             VisualElement root = this;
@@ -128,10 +131,10 @@ namespace LocalPackageManager
             if (FindElement(root, x => x.name == "PackageRemoveCustomButton") is Button removeButton)
             {
                 var parent = removeButton.parent;
-                Debug.Log(parent.childCount);
+                // Debug.Log(parent.childCount);
                 // removeButton.parent.RemoveAt(0);
             }
-        }
+        } */
 
         /// <summary>
         /// Open manifest.json in current project.

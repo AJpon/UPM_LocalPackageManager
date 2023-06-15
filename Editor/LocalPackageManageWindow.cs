@@ -8,8 +8,8 @@ namespace LocalPackageManager
 {
     /// <summary>
     /// Local Package Manager Window.
-    /// WIP
     /// </summary>
+    // TODO 対象パッケージのソースがローカルでない場合、その旨を表示する
     internal sealed class LocalPackageManageWindow : EditorWindow
     {
         const string URI_PREFIX = "file:";
