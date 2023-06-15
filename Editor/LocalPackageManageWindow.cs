@@ -26,7 +26,7 @@ namespace LocalPackageManager
 
         private void OnGUI()
         {
-            EditorApplication.projectChanged += () => UpdatePackageInfoFromManifest();
+            EditorApplication.projectChanged += () => UpdatePackageInfoFromManifest(); // プロジェクトが変更されたらパッケージ情報を更新
             minSize = new(440, 260);
             bool isAbsolutePath = PackageInfo.resolvedPath == PackageInfoFromManifest.Replace("file:", "").Replace("/", "\\");
 
@@ -37,7 +37,7 @@ namespace LocalPackageManager
             // GUILayout.Label("<size=12><b>Local Package Manager</b></size>", style);
             // GUILayout.Box("", GUILayout.ExpandWidth(true), GUILayout.Height(1));
 
-            // 各種パッケージ情報を
+            // 各種パッケージ情報を表示
             GUILayout.Label("<size=16><b>" + PackageInfo.displayName + "</b></size>", style);
             GUILayout.Label(PackageInfo.name);
             GUILayout.Label(PackageInfo.version);
@@ -55,7 +55,10 @@ namespace LocalPackageManager
 
             GUILayout.FlexibleSpace();
 
-            // ボタンを作成
+            //################################
+            // 以下、ボタン類
+            //################################
+
             if (GUILayout.Button("絶対パスに変更"))
             {
                 var abusolutePath = PackageInfo.resolvedPath;
@@ -71,20 +74,23 @@ namespace LocalPackageManager
                 Uri sourceDir = new Uri(pwd);
                 Uri targetDir = new Uri(abusolutePath);
                 Uri relativeUri = sourceDir.MakeRelativeUri(targetDir);
-                if (targetDir.ToString().Replace("file:///", "") == relativeUri.ToString())
+
+                // 相対パスを取得を取得できたか否かで処理分岐
+                bool isSucceeded = targetDir.ToString().Replace("file:///", "") != relativeUri.ToString();
+                if (isSucceeded)
                 {
+                    var relativePath = relativeUri.ToString();
+                    relativePath = URI_PREFIX + relativePath;
+                    AdditionalPackageInfo.SetPackageInfoToManifestJson(PackageInfo, relativePath);
+                }
+                else
+                {
+                    // 何らかの理由で相対パスを取得できなかった場合
                     Debug.LogError("[UpmLPM] 相対パスを取得できませんでした。");
                     bool close = EditorUtility.DisplayDialog("Error", "相対パスを取得できませんでした。", "マネージャーを閉じる", "マネージャーに戻る");
                     if (close) Close();
                 }
-                else
-                {
-                    var relativePath =  relativeUri.ToString();
-                    // PackageInfo の情報を更新
-                    // PackageInfo.resolvedPath = Path.GetFullPath("./Packages/"+relativePath);
-                    relativePath = URI_PREFIX + relativePath;
-                    AdditionalPackageInfo.SetPackageInfoToManifestJson(PackageInfo, relativePath);
-                }
+
                 // ウィンドウを更新
                 UpdatePackageInfoFromManifest();
             }
@@ -117,7 +123,7 @@ namespace LocalPackageManager
         /// </summary>
         public static void Open(PackageInfo packageInfo)
         {
-            var window = CreateInstance<LocalPackageManageWindow>();
+            var window = GetWindow<LocalPackageManageWindow>(); //* 既に開いている場合はそれをアクティブにする
             window.PackageInfo = packageInfo;
             window.UpdatePackageInfoFromManifest(packageInfo);
             window.Show();
