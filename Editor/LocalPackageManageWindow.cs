@@ -29,6 +29,7 @@ namespace LocalPackageManager
             EditorApplication.projectChanged += () => UpdatePackageInfoFromManifest(); // プロジェクトが変更されたらパッケージ情報を更新
             minSize = new(440, 260);
             bool isAbsolutePath = PackageInfo.resolvedPath == PackageInfoFromManifest.Replace("file:", "").Replace("/", "\\");
+            bool isLocalPackage = PackageInfo.source == UnityEditor.PackageManager.PackageSource.Local;
 
             titleContent = new GUIContent("Local Package Manager");
             GUIStyle style = new GUIStyle(EditorStyles.label);
@@ -38,7 +39,7 @@ namespace LocalPackageManager
             // GUILayout.Box("", GUILayout.ExpandWidth(true), GUILayout.Height(1));
 
             // 各種パッケージ情報を表示
-            GUILayout.Label("<size=16><b>" + PackageInfo.displayName + "</b></size>", style);
+            GUILayout.Label($"<size=16><b>{PackageInfo.displayName}</b></size>", style);
             GUILayout.Label(PackageInfo.name);
             GUILayout.Label(PackageInfo.version);
             GUILayout.Box("", GUILayout.ExpandWidth(true), GUILayout.Height(1));
@@ -49,50 +50,59 @@ namespace LocalPackageManager
             // manifest.json の状態を表示するエリアを作成
             GUILayout.Space(12);
             GUILayout.Box("", GUILayout.ExpandWidth(true), GUILayout.Height(1));
-            var pathType = isAbsolutePath ? "絶対パス" : "相対パス";
-            GUILayout.Label("<size=14>Manifest.json には<color=yellow>" + (pathType) + "</color>で記録されています。</size>", style);
-            GUILayout.Label("<size=14><b>・ " + PackageInfoFromManifest + "</b></size>", style);
-
+            if (isLocalPackage)
+            {
+                var pathType = isAbsolutePath ? "絶対パス" : "相対パス";
+                GUILayout.Label($"<size=14>Manifest.json には<color=yellow>{pathType}</color>で記録されています。</size>", style);
+            }
+            else
+            {
+                GUILayout.Label($"<size=14><color=red>このパッケージはローカルパッケージではありません。</color></size>", style);
+            }
+            GUILayout.Label($"<size=14><b>・ {PackageInfoFromManifest}</b></size>", style);
             GUILayout.FlexibleSpace();
 
             //################################
             // 以下、ボタン類
             //################################
 
-            if (GUILayout.Button("絶対パスに変更"))
+            if (isLocalPackage)
             {
-                var abusolutePath = PackageInfo.resolvedPath;
-                abusolutePath = URI_PREFIX + abusolutePath.Replace("\\", "/");
-                AdditionalPackageInfo.SetPackageInfoToManifestJson(PackageInfo, abusolutePath);
-                // ウィンドウを更新
-                UpdatePackageInfoFromManifest();
-            }
-            if (GUILayout.Button("相対パスに変更"))
-            {
-                var abusolutePath = PackageInfo.resolvedPath;
-                var pwd = Path.GetFullPath("./Packages/"); //? ここ "Packages" フォルダ起点であってる？
-                Uri sourceDir = new Uri(pwd);
-                Uri targetDir = new Uri(abusolutePath);
-                Uri relativeUri = sourceDir.MakeRelativeUri(targetDir);
-
-                // 相対パスを取得を取得できたか否かで処理分岐
-                bool isSucceeded = targetDir.ToString().Replace("file:///", "") != relativeUri.ToString();
-                if (isSucceeded)
+                if (GUILayout.Button("絶対パスに変更"))
                 {
-                    var relativePath = relativeUri.ToString();
-                    relativePath = URI_PREFIX + relativePath;
-                    AdditionalPackageInfo.SetPackageInfoToManifestJson(PackageInfo, relativePath);
+                    var abusolutePath = PackageInfo.resolvedPath;
+                    abusolutePath = URI_PREFIX + abusolutePath.Replace("\\", "/");
+                    AdditionalPackageInfo.SetPackageInfoToManifestJson(PackageInfo, abusolutePath);
+                    // ウィンドウを更新
+                    UpdatePackageInfoFromManifest();
                 }
-                else
+                if (GUILayout.Button("相対パスに変更"))
                 {
-                    // 何らかの理由で相対パスを取得できなかった場合
-                    Debug.LogError("[UpmLPM] 相対パスを取得できませんでした。");
-                    bool close = EditorUtility.DisplayDialog("Error", "相対パスを取得できませんでした。", "マネージャーを閉じる", "マネージャーに戻る");
-                    if (close) Close();
-                }
+                    var abusolutePath = PackageInfo.resolvedPath;
+                    var pwd = Path.GetFullPath("./Packages/"); //? ここ "Packages" フォルダ起点であってる？
+                    Uri sourceDir = new Uri(pwd);
+                    Uri targetDir = new Uri(abusolutePath);
+                    Uri relativeUri = sourceDir.MakeRelativeUri(targetDir);
 
-                // ウィンドウを更新
-                UpdatePackageInfoFromManifest();
+                    // 相対パスを取得を取得できたか否かで処理分岐
+                    bool isSucceeded = targetDir.ToString().Replace("file:///", "") != relativeUri.ToString();
+                    if (isSucceeded)
+                    {
+                        var relativePath = relativeUri.ToString();
+                        relativePath = URI_PREFIX + relativePath;
+                        AdditionalPackageInfo.SetPackageInfoToManifestJson(PackageInfo, relativePath);
+                    }
+                    else
+                    {
+                        // 何らかの理由で相対パスを取得できなかった場合
+                        Debug.LogError("[UpmLPM] 相対パスを取得できませんでした。");
+                        bool close = EditorUtility.DisplayDialog("Error", "相対パスを取得できませんでした。", "マネージャーを閉じる", "マネージャーに戻る");
+                        if (close) Close();
+                    }
+
+                    // ウィンドウを更新
+                    UpdatePackageInfoFromManifest();
+                }
             }
             if (GUILayout.Button("Open manifest.json"))
             {

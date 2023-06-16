@@ -24,7 +24,6 @@ namespace LocalPackageManager
         // Private Members.
         //################################
         private bool _initialized;
-        // private Button _openLocalPackageManagerButton;
         private PackageInfo _packageInfo;
 
         [InitializeOnLoadMethod]
@@ -65,14 +64,16 @@ namespace LocalPackageManager
             // Debug.Log($"[UpmLPM] UPM package info: packageId=" + packageInfo.packageId);
             // Debug.Log($"[UpmLPM] UPM package info: resolvedPath=" + packageInfo.resolvedPath);
             // Debug.Log($"[UpmLPM] UPM package info: assetPath=" + packageInfo.assetPath);
+
+            _packageInfo = packageInfo; //? 暫定処置
             if (packageInfo.source == PackageSource.Local)
             {
                 // Debug.Log($"[UpmLPM] {packageInfo.displayName} is local package.");
                 // TODO: ローカルパッケージの場合は、マニフェストを編集できるUI出す
-                _packageInfo = packageInfo; //? 暫定処置
+                // _packageInfo = packageInfo;
                 // CreateLocalPackageManageButton();
             } else {
-                _packageInfo = null;
+                // _packageInfo = null;
                 // RemoveLocalPackageManageButton();
             }
             Initialize();
@@ -101,15 +102,15 @@ namespace LocalPackageManager
             }
 
             // Add open local package manager button.
-            // TODO: UI作成(超ざっくりでいいのでとりあえず動くようにする)
-            Debug.Log($"[UpmLPM] _packageInfo.source: {_packageInfo.source}");
+            // TODO: ローカルパッケージのときのみボタンを追加する
+            // Debug.Log($"[UpmLPM] _packageInfo.source: {_packageInfo.source}");
             Button openLocalPackageManagerButton = new(() => { LocalPackageManageWindow.Open(_packageInfo); });
             openLocalPackageManagerButton.text = "Edit"; //* 仮ラベル
             openLocalPackageManagerButton.name = "PackageOpenLocalPackageManagerButton";
             // openLocalPackageManagerButton.SetEnabled(_packageInfo.source == PackageSource.Local);
             if (FindElement(root, x => x.name == "PackageRemoveCustomButton") is Button removeButton)
             {
-                Debug.Log($"[UpmLPM] removeButton.parent.name: {removeButton.parent.name}");
+                // Debug.Log($"[UpmLPM] removeButton.parent.name: {removeButton.parent.name}"); //? return builtInActions
                 removeButton.parent.Insert(0, openLocalPackageManagerButton);
             }
         }

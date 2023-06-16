@@ -14,11 +14,20 @@ namespace LocalPackageManager
         {
             string rawJson = GetManifestJsonContent();
             JObject jsonObject = JsonConvert.DeserializeObject<JObject>(rawJson);
-            string dependencyVal = jsonObject["dependencies"][packageInfo.name].ToString();
+            string dependencyVal;
+            try
+            {
+                dependencyVal = jsonObject["dependencies"][packageInfo.name].ToString();
+            }
+            catch (System.NullReferenceException)
+            {
+                return $"\"{packageInfo.name}\" not found in manifest.json.\nPackage may not be installed or may be an embedded package";
+            }
             return dependencyVal;
         }
 
-        internal static void SetPackageInfoToManifestJson(PackageInfo packageInfo, string packageInfoVal){
+        internal static void SetPackageInfoToManifestJson(PackageInfo packageInfo, string packageInfoVal)
+        {
             string rawJson = GetManifestJsonContent();
             JObject jsonObject = JsonConvert.DeserializeObject<JObject>(rawJson);
             jsonObject["dependencies"][packageInfo.name] = packageInfoVal;
