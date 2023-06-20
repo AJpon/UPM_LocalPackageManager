@@ -9,7 +9,12 @@ UPMでローカルパッケージを追加すると、パッケージのパス�
 また、UPMで選択した追加済みローカルパッケージの記録パスをGUIで確認、変更できるようにします。
 
 ## Install
-Install via UPM  
+UPMを使用してインストールします。
+
+1. `Window` > `Package Manager` を開きます。
+2. `+` > `Add package from git URL...` を選択します。
+3. ```https://github.com/AJpon/UPM_LocalPackageManager.git``` を入力し、`Add` を押します。
+
 ```
 https://github.com/AJpon/UPM_LocalPackageManager.git
 ```
