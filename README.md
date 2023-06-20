@@ -1,11 +1,11 @@
 # UPM_LocalPackageManager
 ## 概要
-Unity Package Manager(UPM)で、ローカルパッケージパスの記録方式を変更するパッケージです。
+Local package manager(以下LPM)は、Unity Package Manager(UPM)でローカルパッケージパスの記録方式を変更するパッケージです。
 
 UPMでローカルパッケージを追加すると、パッケージのパスが`manifest.json`に記録されます。通常は絶対パスが記録されますが、`manifest.json`を直接変更することで相対パスを使用することもできます。  
 しかし、パスの記録方式の変更や確認は手作業で行う必要がありました。
 
-本パッケージはUPMでローカルパッケージを追加するときに、パスの記録方式を選択できるようにします。  
+LPMはUPMでローカルパッケージを追加するときに、パスの記録方式を選択できるようにします。  
 また、UPMで選択した追加済みローカルパッケージの記録パスをGUIで確認、変更できるようにします。
 
 ## インストール
@@ -19,8 +19,8 @@ https://github.com/AJpon/UPM_LocalPackageManager.git
 3. ```https://github.com/AJpon/UPM_LocalPackageManager.git``` を入力し、`Add` を押すことで最新版がインストールされます。
 
 ## 使い方
-UPM上から専用のウィンドウを開くことができます。また、このウィンドウはローカルパッケージの追加時に自動で開きます。  
-ここでは`manifest.json`の`dependencies`に記録されたパスをGUIで確認、変更できます。
+UPM上でパッケージを選択し、`Open LPM`を押すとLPMが開きます。また、LPMはローカルパッケージの追加時に自動で開きます。  
+LPMでは`manifest.json`の`dependencies`に記録されたパスをGUIで確認、変更できます。
 
 
 <!-- 
