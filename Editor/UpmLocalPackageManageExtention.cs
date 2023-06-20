@@ -105,7 +105,7 @@ namespace LocalPackageManager
             // TODO: ローカルパッケージのときのみボタンを追加する
             // Debug.Log($"[UpmLPM] _packageInfo.source: {_packageInfo.source}");
             Button openLocalPackageManagerButton = new(() => { LocalPackageManageWindow.Open(_packageInfo); });
-            openLocalPackageManagerButton.text = "Edit"; //* 仮ラベル
+            openLocalPackageManagerButton.text = "Open LPM"; //* 仮ラベル
             openLocalPackageManagerButton.name = "PackageOpenLocalPackageManagerButton";
             // openLocalPackageManagerButton.SetEnabled(_packageInfo.source == PackageSource.Local);
             if (FindElement(root, x => x.name == "PackageRemoveCustomButton") is Button removeButton)
