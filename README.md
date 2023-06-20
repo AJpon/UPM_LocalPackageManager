@@ -8,6 +8,11 @@ UPMでローカルパッケージを追加すると、パッケージのパス�
 LPMはUPMでローカルパッケージを追加するときに、パスの記録方式を選択できるようにします。  
 また、UPMで選択した追加済みローカルパッケージの記録パスをGUIで確認、変更できるようにします。
 
+![image](./Imgs/overview.gif)
+
+## 要件
+Unity 2022.3.0f1 以上
+
 ## インストール
 UPMを使用してインストールします。
 ```
@@ -19,13 +24,17 @@ https://github.com/AJpon/UPM_LocalPackageManager.git
 3. ```https://github.com/AJpon/UPM_LocalPackageManager.git``` を入力し、`Add` を押すことで最新版がインストールされます。
 
 ## 使い方
-UPM上でパッケージを選択し、`Open LPM`を押すとLPMが開きます。また、LPMはローカルパッケージの追加時に自動で開きます。  
-LPMでは`manifest.json`の`dependencies`に記録されたパスをGUIで確認、変更できます。
+UPM上でパッケージを選択し、`Open LPM`を押すとLPMが開きます。ローカルパッケージの追加時には自動で開きます。  
+LPMでは`manifest.json`の`dependencies`に記録されたパスの形式をGUIで確認、変更できます。  
+`Open manifest.json`を押すとUnityで設定したデフォルトのエディタで`manifest.json`を開きます。
 
+![image](./Imgs/lpm.gif)
 
-<!-- 
-・UPMでRemoveボタンの横のEditを押すとインスペクタが出る
-・インスペクタから情報の確認、manifest.json の修正, Openができる
-UPM周辺で完結させたいのでこういう感じになってる 
--->
+## 注意事項
+- LPMは`manifest.json`の`dependencies`に記録されたパスの形式を変更するだけで、パッケージのインストールやアンインストールは行いません。
+- 相対パスで示せない場所にインストールされたパッケージは、相対パスに変更することはできません。その場合、絶対パスを使用します。
+    - ドライブパスが異なる場合などが該当します。
 
+## License
+[MIT License](./LICENSE)  
+Copyright (c) 2023 pon
