@@ -3,10 +3,11 @@
     "name": "io.github.ajpon.localpackagemanager",
     "displayName": "Local package manager",
     "description": "Local package manager",
-    "version": "0.1.0",
+    "version": "0.1.1",
     "keywords": [
         "upm",
-        "editor"
+        "UnityEditor",
+        "Unity"
     ],
     "unity": "2022.3",
     "dependencies": {
