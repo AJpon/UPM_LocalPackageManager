@@ -16,7 +16,6 @@ namespace LocalPackageManager
     /// <summary>
     /// UPM Local Package Manager Extention.
     /// </summary>
-
     [InitializeOnLoad]
     internal sealed class UpmLocalPackageManageExtention : VisualElement, IPackageManagerExtension
     {
@@ -25,6 +24,7 @@ namespace LocalPackageManager
         //################################
         private bool _initialized;
         private PackageInfo _packageInfo;
+        private Button openLocalPackageManagerButton;
 
         [InitializeOnLoadMethod]
         private static void InitializeOnLoadMethod()
@@ -42,6 +42,7 @@ namespace LocalPackageManager
             _initialized = false;
             return this;
         }
+
         void IPackageManagerExtension.OnPackageAddedOrUpdated(PackageInfo packageInfo)
         {
             if (packageInfo == null) return;
@@ -58,7 +59,14 @@ namespace LocalPackageManager
         void IPackageManagerExtension.OnPackageSelectionChange(PackageInfo packageInfo)
         {
             // Debug.Log("[UpmLPM] OnPackageSelectionChange");
-            if (packageInfo == null) return;
+
+            Initialize();
+            if (packageInfo == null)
+            {
+                openLocalPackageManagerButton.style.display = DisplayStyle.None;
+                return;
+            }
+
             // Debug.Log($"[UpmLPM] UPM package info: name=" + packageInfo.name);
             // Debug.Log($"[UpmLPM] UPM package info: source=" + packageInfo.source);
             // Debug.Log($"[UpmLPM] UPM package info: packageId=" + packageInfo.packageId);
@@ -69,14 +77,12 @@ namespace LocalPackageManager
             if (packageInfo.source == PackageSource.Local)
             {
                 // Debug.Log($"[UpmLPM] {packageInfo.displayName} is local package.");
-                // TODO: ローカルパッケージの場合は、マニフェストを編集できるUI出す
-                // _packageInfo = packageInfo;
-                // CreateLocalPackageManageButton();
-            } else {
-                // _packageInfo = null;
-                // RemoveLocalPackageManageButton();
+                openLocalPackageManagerButton.style.display = DisplayStyle.Flex;
             }
-            Initialize();
+            else
+            {
+                openLocalPackageManagerButton.style.display = DisplayStyle.None;
+            }
         }
 
         /// <summary>
@@ -85,7 +91,7 @@ namespace LocalPackageManager
         private void Initialize()
         {
             if (_initialized) return;
-            CreateLocalPackageManageButton(); // TODO この実装だとローカルパッケージ以外でもUIが表示されるので後で修正
+            CreateLocalPackageManageButton();
             _initialized = true;
         }
 
@@ -102,59 +108,20 @@ namespace LocalPackageManager
             }
 
             // Add open local package manager button.
-            // TODO: ローカルパッケージのときのみボタンを追加する
             // Debug.Log($"[UpmLPM] _packageInfo.source: {_packageInfo.source}");
-            Button openLocalPackageManagerButton = new(() => { LocalPackageManageWindow.Open(_packageInfo); });
+            openLocalPackageManagerButton = new(() => { LocalPackageManageWindow.Open(_packageInfo); });
             openLocalPackageManagerButton.text = "Open LPM"; //* 仮ラベル
             openLocalPackageManagerButton.name = "PackageOpenLocalPackageManagerButton";
-            // openLocalPackageManagerButton.SetEnabled(_packageInfo.source == PackageSource.Local);
-            if (FindElement(root, x => x.name == "PackageRemoveCustomButton") is Button removeButton)
+
+            // Display property is none by default. (It set to flex when the package is local.)
+            openLocalPackageManagerButton.style.display = DisplayStyle.None;
+
+            // builtInActions はUPM のパッケージ詳細画面の右上にあるボタン群をまとめたVisualElement
+            if (FindElement(root, x => x.name == "builtInActions") is VisualElement builtInActions)
             {
-                // Debug.Log($"[UpmLPM] removeButton.parent.name: {removeButton.parent.name}"); //? return builtInActions
-                removeButton.parent.Insert(0, openLocalPackageManagerButton);
+                builtInActions.Insert(0, openLocalPackageManagerButton);
             }
         }
-
-        /// <summary>
-        /// 作成したUIを削除する
-        /// </summary>
-        /* private void RemoveLocalPackageManageButton()
-        {
-            // Find root element.
-            VisualElement root = this;
-            while (root != null && root.parent != null)
-            {
-                root = root.parent;
-            }
-
-            // Remove open local package manager button.
-            // TODO: 追加したボタンの削除処理実装
-            if (FindElement(root, x => x.name == "PackageRemoveCustomButton") is Button removeButton)
-            {
-                var parent = removeButton.parent;
-                // Debug.Log(parent.childCount);
-                // removeButton.parent.RemoveAt(0);
-            }
-        } */
-
-        /// <summary>
-        /// Open manifest.json in current project.
-        /// </summary>
-        /*
-        private void OpenManifestJson()
-        {
-            // json files will be opend with code editor.
-            var extensions = EditorSettings.projectGenerationUserExtensions;
-            if (!extensions.Contains("json"))
-            {
-                EditorSettings.projectGenerationUserExtensions = extensions.Concat(new[] { "json" }).ToArray();
-                AssetDatabase.SaveAssets();
-            }
-
-            // Open manifest.json with current code editor.
-            Unity.CodeEditor.CodeEditor.CurrentEditor.OpenProject(Path.GetFullPath("./Packages/manifest.json"));
-        } 
-        */
 
         /// <summary>
         /// Execute VisualElementExtention.FindElements method.
@@ -174,6 +141,7 @@ namespace LocalPackageManager
                 Debug.LogError("[UpmLPM] Unity.UI.Builder.VisualElementExtention is not found.");
                 return null;
             }
+
             MethodInfo findElementsMethod = type.GetMethod("FindElements", BindingFlags.Static | BindingFlags.Public);
             if (findElementsMethod == null)
             {
@@ -181,7 +149,8 @@ namespace LocalPackageManager
                 return null;
             }
 
-            List<VisualElement> result = (List<VisualElement>)(findElementsMethod?.Invoke(null, new object[] { element, predicate }));
+            List<VisualElement> result =
+                (List<VisualElement>)(findElementsMethod?.Invoke(null, new object[] { element, predicate }));
             return result;
         }
 
