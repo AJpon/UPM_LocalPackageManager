@@ -1,5 +1,5 @@
 {
-    "name": "io.github.ajpon.localpackagemanager.Editor",
+    "name": "AJpon.LPM.Editor",
     "rootNamespace": "",
     "references": [],
     "includePlatforms": [

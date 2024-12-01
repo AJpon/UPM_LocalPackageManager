@@ -1,16 +1,16 @@
 {
-    "author": "pon",
-    "name": "io.github.ajpon.localpackagemanager",
-    "displayName": "Local package manager",
-    "description": "Local package manager",
-    "version": "0.1.1",
-    "keywords": [
-        "upm",
-        "UnityEditor",
-        "Unity"
-    ],
-    "unity": "2022.3",
-    "dependencies": {
-        "com.unity.nuget.newtonsoft-json": "1.0.0"
-    }
+  "author": "pon",
+  "name": "com.ajpon.localpackagemanager",
+  "displayName": "Local Package Manager",
+  "description": "Local package manager",
+  "version": "0.2.0-pre.1",
+  "keywords": [
+    "upm",
+    "UnityEditor",
+    "Unity"
+  ],
+  "unity": "2022.3",
+  "dependencies": {
+    "com.unity.nuget.newtonsoft-json": "1.0.0"
+  }
 }
